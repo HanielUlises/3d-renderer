@@ -1,8 +1,12 @@
+CC = gcc
+CFLAGS = -Wall -std=c99 -I./include `pkg-config --cflags sdl2`
+LIBS = `pkg-config --libs sdl2`
+
 build:
-	gcc -Wall -std=c99 -I./include ./src/*.c -o renderer
+	$(CC) $(CFLAGS) ./src/*.c -o renderer $(LIBS)
 
 run:
 	./renderer
 
 clean:
-	rm renderer
+	rm -f renderer
