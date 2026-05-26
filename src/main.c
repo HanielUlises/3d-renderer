@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 
 #include "display.h"
+#include "vector.h"
 
 bool is_running = false;
 
