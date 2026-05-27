@@ -20,7 +20,7 @@ void process_input(void);
 void update(void);
 void render_color_buffer(void);
 void clear_color_buffer(uint32_t color);
-void draw_grid(void);
+void draw_grid(int step);
 void draw_pixel(int x, int y, uint32_t color);
 void draw_rectangle(int x, int y, int height, int width, uint32_t color);
 void render(void);

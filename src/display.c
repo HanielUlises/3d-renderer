@@ -1,13 +1,16 @@
 #include "display.h"
 #include "vector.h"
 
-const int N_POINTS = 9 * 9 * 9;
+#define N_POINTS (9 * 9 * 9)
 vec3_t cube_points[N_POINTS]; 
+vec2_t projected_points[N_POINTS];
 
 uint32_t *color_buffer = NULL;
 
 int window_width = 800;
 int window_height = 600;
+
+float fov_factor = 128;
 
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
@@ -50,7 +53,24 @@ void setup(void) {
     }  
 }
 
-void update(void) {}
+// Projected 2D point from a 3D vector
+vec2_t project(vec3_t point) {
+    vec2_t projected_point = {
+        .x = (fov_factor * point.x),
+        .y = (fov_factor * point.y)
+    };
+
+    return projected_point;
+}
+
+void update(void) {
+    for(int i = 0; i < N_POINTS; i++) {
+        vec3_t point = cube_points[i];
+        // Project current point
+        vec2_t projected_point = project(point);
+        projected_points[i] = projected_point;
+    }
+}
 
 void render_color_buffer(void) {
     SDL_UpdateTexture(color_buffer_texture, NULL, color_buffer, (int) (window_width * sizeof(uint32_t)));
@@ -65,19 +85,19 @@ void clear_color_buffer(uint32_t color) {
     }
 }
 
-void draw_grid(void) {
+void draw_grid(int step) {
     clear_color_buffer(0x000000);
 
     for (int y = 0; y < window_height; y++) {
         for (int x = 0; x < window_width; x++) {
-            if(x % 50 == 0 || y % 50 == 0)
+            if(x % step == 0 || y % step == 0)
                 color_buffer[(window_width * y) + x] = 0xFFFFFF;
         }
     }
 }
 
 void draw_pixel(int x, int y, uint32_t color) {
-    if(x < window_width && y < window_height) 
+    if(x >= 0 && x < window_width && y >= 0 && y < window_height) 
         color_buffer[(window_width * y) + x] = color;
 }
 
@@ -86,20 +106,21 @@ void draw_rectangle(int x, int y, int height, int width, uint32_t color) {
         for(int j = 0; j < height; j++) {
             int current_x = x + i;
             int current_y = y + j;
-            color_buffer[(window_width * current_y) + current_x] = color;
+            draw_pixel(current_x, current_y, color);
         }
     }
 }
 
 void render(void) {
-    SDL_SetRenderDrawColor(renderer, 0, 100, 110, 255);
-    SDL_RenderClear(renderer);
+    // draw_grid(25);
 
-    draw_grid();
-    draw_rectangle(300, 200, 150, 300, 0xFFFF00FF);
+    for(int i = 0; i < N_POINTS; i++) {
+        vec2_t projected_point = projected_points[i]; 
+        draw_rectangle(projected_point.x + (window_width / 2), projected_point.y + (window_height / 2), 4, 4, 0xFFFFFF00);
+    }
 
     render_color_buffer();
-    // clear_color_buffer(0xFFFFFF00);
+    clear_color_buffer(0xFF000000);
 
     SDL_RenderPresent(renderer);
 }
