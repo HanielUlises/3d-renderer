@@ -14,6 +14,8 @@ uint32_t *color_buffer = NULL;
 int window_width = 800;
 int window_height = 600;
 
+int previous_frame_time;
+
 float fov_factor = 640;
 
 SDL_Window *window = NULL;
@@ -68,6 +70,10 @@ vec2_t project(vec3_t point) {
 }
 
 void update(void) {
+    while(!SDL_TICKS_PASSED(SDL_GetTicks(), previous_frame_time + FRAME_TARGET_TIME));
+
+    previous_frame_time = SDL_GetTicks();
+
     cube_rotation.y += 0.01;
     cube_rotation.z += 0.01;
 
